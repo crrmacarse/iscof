@@ -40,7 +40,7 @@ export default class HomeScreen extends React.Component {
             </Text>
 
               <Text style={styles.paragraph}>
-                Iloilo State College of Science and Technology
+                Iloilo State College of Science and Technology - Dumangas Campus
             </Text>
 
             </View>
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flexGrow: 1,
-    fontSize: 90,
+    fontSize: 65,
     letterSpacing: 8,
     fontWeight: 'bold',
     textAlign: 'center',

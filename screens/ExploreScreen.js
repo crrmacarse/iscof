@@ -3,7 +3,9 @@ import React, { Component } from 'react';
 import {
   View,
   Alert,
-  Picker
+  Picker,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
 
 import {
@@ -58,9 +60,7 @@ export default class ExploreScreen extends React.Component {
         ],
         { cancelable: false }
       )
-
     }
-
   }
 
   componentDidMount() {
@@ -70,8 +70,24 @@ export default class ExploreScreen extends React.Component {
   render() {
     const { location, layer } = this.state;
 
+    if (!location) {
+      return (
+        <View style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Text style={{ textAlign: 'center' }}>Kindly enable your location services first.</Text>
+          <TouchableOpacity
+            onPress={this._getLocationAsync}>
+            <Text style = {{marginTop: 5}}>Refresh</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
     return (
-      <View style={{ flex: 1}}>
+      <View style={{ flex: 1 }}>
         <MapView
           style={{
             flex: 1,
@@ -96,11 +112,10 @@ export default class ExploreScreen extends React.Component {
           }}
         >
 
-
-          {location && <Marker coordinate={location.coords} title="You're here" />}
+          <Marker coordinate={location.coords} title="You're here" />
 
         </MapView>
-        
+
         <Picker
           selectedValue={layer}
           style={{

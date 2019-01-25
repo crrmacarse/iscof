@@ -39,7 +39,7 @@ export default class AboutScreen extends React.Component {
   }
 
   _handleVisitWebsitePress = () => {
-    WebBrowser.openBrowserAsync('https://www.iscof.edu.ph/');
+    WebBrowser.openBrowserAsync('http://www.iscof.edu.ph/');
   }
 
   _handleReadMoreHistory = () => {
