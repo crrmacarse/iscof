@@ -1,17 +1,26 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
-import { 
+import {
   View,
   Button,
   TextInput,
   Text
- } from 'react-native';
+} from 'react-native';
 
 export default class NavigateScreen extends React.Component {
   static navigationOptions = {
-    title: 'Navigate',
+    title: 'Campus Navigator',
+    headerStyle: {
+      backgroundColor: '#ffa000',
+      borderBottomColor: 'black',
+      borderBottomWidth: 0,
+    },
   };
+
+  _handlePress = () => {
+    console.log("not yet");
+  }
 
   render() {
     return (
@@ -20,18 +29,19 @@ export default class NavigateScreen extends React.Component {
         <View style={styles.contentContainer}>
 
           <Text style={styles.title}>
-              ISCOF Navigator 
+            ISCOF Navigator
           </Text>
-        
+
           <TextInput
-              style={styles.inputBox}
-            />
-            <Button
-              title="Search"
-              color="#0f5e00"
-              accessibilityLabel="Learn more about this purple button"
-            />
-        
+            style={styles.inputBox}
+          />
+          <Button
+            onPress = {this._handlePress}
+            title="Search"
+            color="#0f5e00"
+            accessibilityLabel="Learn more about this purple button"
+          />
+
         </View>
 
       </ScrollView>
@@ -53,7 +63,7 @@ const styles = StyleSheet.create({
   inputBox: {
     marginTop: 10,
     marginBottom: 10,
-    borderColor: 'gray', 
+    borderColor: 'gray',
     borderWidth: 1
   }
 });

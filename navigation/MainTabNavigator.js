@@ -6,6 +6,7 @@ import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
 import NavigateScreen from '../screens/NavigateScreen';
 import AboutScreen from '../screens/AboutScreen';
+import ExploreScreen from '../screens/ExploreScreen';
 import CamusMapScreen from '../screens/CamusMapScreen';
 
 const HomeStack = createStackNavigator({
@@ -14,6 +15,9 @@ const HomeStack = createStackNavigator({
 
 HomeStack.navigationOptions = {
   tabBarLabel: 'Home',
+  tabBarOptions: {
+    activeTintColor: 'green',
+  },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
@@ -32,6 +36,9 @@ const NavigateStack = createStackNavigator({
 
 NavigateStack.navigationOptions = {
   tabBarLabel: 'Navigate',
+  tabBarOptions: {
+    activeTintColor: 'green',
+  },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
@@ -40,12 +47,15 @@ NavigateStack.navigationOptions = {
   ),
 };
 
-const CampusMapStack = createStackNavigator({
-  CampusMap: CamusMapScreen,
+const ExploreStack = createStackNavigator({
+  Explore: ExploreScreen,
 });
 
-CampusMapStack.navigationOptions = {
-  tabBarLabel: 'Campus Map',
+ExploreStack.navigationOptions = {
+  tabBarLabel: 'Explore',
+  tabBarOptions: {
+    activeTintColor: 'green',
+  },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
@@ -56,10 +66,14 @@ CampusMapStack.navigationOptions = {
 
 const AboutStack = createStackNavigator({
   About: AboutScreen,
+  CampusMap: CamusMapScreen,
 });
 
 AboutStack.navigationOptions = {
   tabBarLabel: 'More',
+  tabBarOptions: {
+    activeTintColor: 'green',
+  },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
@@ -71,6 +85,6 @@ AboutStack.navigationOptions = {
 export default createBottomTabNavigator({
   HomeStack,
   NavigateStack,
-  CampusMapStack,
+  ExploreStack,
   AboutStack,
 });

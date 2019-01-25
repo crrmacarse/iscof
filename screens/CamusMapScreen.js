@@ -1,44 +1,45 @@
-import React,  { Component } from 'react';
+import React from 'react';
+
 import {
   ScrollView,
   StyleSheet,
-  Platform } from 'react-native';
-
-import {
-  MapView,
-} from 'expo';
-
-import { Marker } from 'react-native-maps';
+  View,
+  ImageBackground,
+  Image,
+} from 'react-native';
 
 export default class MapScreen extends React.Component {
   static navigationOptions = {
     title: 'Campus Map',
+    headerStyle: {
+      backgroundColor: '#ffa000',
+      borderBottomColor: 'black',
+      borderBottomWidth: 0,
+    }
   };
-
   render() {
-   
     return (
-        <MapView
-        style={{ flex: 1 }}
-        mapType = "satellite"
-        minZoomLevel = {18}
-        maxZoomLevel = {18}
-        scrollEnabled = {false}
-        initialRegion={{
-          latitude: 10.8262703,
-          longitude: 122.7115049,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      >
-      <Marker
-            coordinate = {{
-                latitude: 10.8259498,
-                longitude: 122.7118036,
-            }}
-            title = "You're here"
-        />
-    </MapView>
+      <View style={styles.container}>
+        <Image
+          source={require('../assets/images/campusmap.png')}
+          style={styles.campusMap}
+          resizeMode = "contain" 
+          />
+      </View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 15,
+    backgroundColor: 'rgb(184, 223,203)'
+  },
+  campusMap: {
+    flex: 1,
+    width: undefined,
+    height: undefined,
+    transform: [{rotate: '-16deg'}]
+  }
+});
