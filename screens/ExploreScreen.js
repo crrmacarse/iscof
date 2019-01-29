@@ -1,4 +1,6 @@
-import React, { Component } from 'react';
+import React from 'react';
+
+import {withFirebase} from '../firebase';
 
 import {
   View,
@@ -16,15 +18,7 @@ import {
 
 import { Marker } from 'react-native-maps';
 
-export default class ExploreScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Campus Explore',
-    headerStyle: {
-      backgroundColor: '#ffa000',
-      borderBottomColor: 'black',
-      borderBottomWidth: 0,
-    }
-  };
+class ExploreScreen extends React.Component {
 
   state = {
     location: null,
@@ -80,7 +74,7 @@ export default class ExploreScreen extends React.Component {
           <Text style={{ textAlign: 'center' }}>Kindly enable your location services first.</Text>
           <TouchableOpacity
             onPress={this._getLocationAsync}>
-            <Text style = {{marginTop: 5}}>Refresh</Text>
+            <Text style={{ marginTop: 5 }}>Refresh</Text>
           </TouchableOpacity>
         </View>
       );
@@ -138,3 +132,16 @@ export default class ExploreScreen extends React.Component {
     );
   }
 }
+
+const withFirebaseExplore = withFirebase(ExploreScreen);
+
+withFirebaseExplore.navigationOptions = ({ navigation }) => ({
+  title: 'Campus Navigator',
+  headerStyle: {
+    backgroundColor: '#ffa000',
+    borderBottomColor: 'black',
+    borderBottomWidth: 0,
+  },
+});
+
+export default withFirebaseExplore;

@@ -3,16 +3,33 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
 
+import Firebase, { FirebaseContext } from './firebase';
+
 export default class App extends React.Component {
   state = {
     isLoadingComplete: false,
   };
 
-  componentDidMount(){
+  componentDidMount() {
     Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.ALL);
+
+    /* 
+         Firebase interaction error 
+    
+         https://github.com/facebook/react-native/issues/12981
+    
+         hiding for future fix
+     
+      */
+
+    console.ignoredYellowBox = [
+      'Setting a timer'
+    ]
+
   }
 
   render() {
+
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
       return (
         <AppLoading
@@ -23,10 +40,12 @@ export default class App extends React.Component {
       );
     } else {
       return (
-        <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-          <AppNavigator />
-        </View>
+        <FirebaseContext.Provider value={new Firebase()}>
+          <View style={styles.container}>
+            {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+            <AppNavigator />
+          </View>
+        </FirebaseContext.Provider>
       );
     }
   }
