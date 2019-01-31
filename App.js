@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View, YellowBox } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
 
@@ -13,6 +13,9 @@ export default class App extends React.Component {
   componentDidMount() {
     Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.ALL);
 
+  }
+
+  render() {
     /* 
          Firebase interaction error 
     
@@ -21,15 +24,7 @@ export default class App extends React.Component {
          hiding for future fix
      
       */
-
-    console.ignoredYellowBox = [
-      'Setting a timer'
-    ]
-
-  }
-
-  render() {
-
+    YellowBox.ignoreWarnings(['Setting a timer']);
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
       return (
         <AppLoading

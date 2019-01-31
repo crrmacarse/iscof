@@ -41,7 +41,6 @@ class NavigateScreen extends React.Component {
   }
 
   render() {
-    console.log(this);
     return (
       <ScrollView style={styles.container}>
 

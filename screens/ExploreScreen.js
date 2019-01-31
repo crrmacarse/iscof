@@ -1,6 +1,4 @@
-import React from 'react';
-
-import {withFirebase} from '../firebase';
+import React, { Component } from 'react';
 
 import {
   View,
@@ -16,17 +14,19 @@ import {
   Permissions
 } from 'expo';
 
+import { withFirebase } from '../firebase';
 import { Marker } from 'react-native-maps';
 
 class ExploreScreen extends React.Component {
-
   state = {
     location: null,
-    layer: 'satellite',
+    where: null,
+    layer: 'satellite'
   };
 
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
+
     if (status !== 'granted') {
       Alert.alert(
         'Permission not granted',
@@ -41,9 +41,15 @@ class ExploreScreen extends React.Component {
     try {
       let location = await Location.getCurrentPositionAsync({});
 
-      this.setState({
-        location,
-      });
+      let where = (await Location.reverseGeocodeAsync(location.coords))[0];
+
+      if(location){
+        this.setState({
+          location,
+          where
+         });
+      }
+
     } catch (error) {
 
       Alert.alert(
@@ -62,7 +68,7 @@ class ExploreScreen extends React.Component {
   }
 
   render() {
-    const { location, layer } = this.state;
+    const { location, layer, where } = this.state;
 
     if (!location) {
       return (
@@ -88,9 +94,9 @@ class ExploreScreen extends React.Component {
             zIndex: -1
           }}
           mapType={layer}
-          minZoomLevel={18}
-          maxZoomLevel={18}
-          scrollEnabled={false}
+          // minZoomLevel={18}
+          maxZoomLevel={16}
+          // scrollEnabled={false}
           showsIndoors={false}
           showsTraffic={false}
           showsCompass
@@ -99,14 +105,18 @@ class ExploreScreen extends React.Component {
           showsMyLocationButton
           moveOnMarkerPress={false}
           initialRegion={{
-            latitude: 10.8262703,
-            longitude: 122.7115049,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.0922 / 2.5,
+            longitudeDelta: 0.0421 / 2.5,
           }}
         >
 
-          <Marker coordinate={location.coords} title="You're here" />
+          <Marker
+            coordinate={location.coords}
+            title="You're here"
+            description={where.name + " " + where.street + ", " + where.city}
+          />
 
         </MapView>
 
@@ -114,8 +124,8 @@ class ExploreScreen extends React.Component {
           selectedValue={layer}
           style={{
             position: 'absolute',
-            backgroundColor: '#f3f3f3',
-            borderColor: 'green',
+            backgroundColor: '#f3f3f3', 
+            color: '#333',
             width: 75,
             height: 30,
             bottom: 10,
@@ -124,14 +134,15 @@ class ExploreScreen extends React.Component {
           }}
           mode="dropdown"
           onValueChange={(itemValue, itemIndex) => this.setState({ layer: itemValue })}>
-          <Picker.Item label="Default" value="standard" />
-          <Picker.Item label="Satellite" value="satellite" />
+          <Picker.Item label="Default" color="black" value="standard" />
+          <Picker.Item label="Satellite" color="black" value="satellite" />
         </Picker>
 
       </View>
     );
   }
 }
+
 
 const withFirebaseExplore = withFirebase(ExploreScreen);
 

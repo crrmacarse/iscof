@@ -32,17 +32,29 @@ class MapScreen extends React.Component {
           }}
           visible={this.state.modalVisible}
         >
-          <View style={{ marginTop: 22 }}>
+          <View style={{ flex: 1, justifyContent: 'center', textAlign: 'center', alignItems: 'center' }}>
             <View>
-              <Text>Campus Map Directory</Text>
+              <Text style = {{fontSize: 20, margin: 15, fontWeight:'bold'}}>ISCOF Campus Map Directory</Text>
+            </View>
 
+            <View style = {{flexDirection: 'column'}}>
+              <Text style = {{margin: 1, }}>1: Administration</Text>
+              <Text style = {{margin: 1, }}>2: Enterprise</Text>
+              <Text style = {{margin: 1, }}>3: College of Computer Studies</Text>
+              <Text style = {{margin: 1, }}>4: College of Lorem Ipsum</Text>
+              <Text style = {{margin: 1, }}>5: Dolor Sit</Text>
+              <Text style = {{margin: 1, }}>6: Football Field</Text>
+            </View>
+
+            <View style = {{marginTop: 25}}>
               <TouchableOpacity
                 onPress={() => {
                   this.setModalVisible(!this.state.modalVisible);
                 }}>
-                <Text>Hide Modal</Text>
+                <Text>Hide Directory</Text>
               </TouchableOpacity>
             </View>
+
           </View>
         </Modal>
 
