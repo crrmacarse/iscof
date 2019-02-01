@@ -50,7 +50,7 @@ export default class AboutScreen extends React.Component {
 
   render() {
     const { readMore } = this.state;
-    const {navigate} = this.props.navigation;
+    const { navigate } = this.props.navigation;
 
     return (
 
@@ -144,13 +144,24 @@ export default class AboutScreen extends React.Component {
           <Text style={styles.historyTitle}>
             Campus Map
           </Text>
-          <View style = {styles.campusTourButtonContainer}>
-          <Button
-            onPress={() => navigate('CampusMap')}
-            title="View Campus Map"
-            color="#0f5e00"
-            accessibilityLabel="Go for a Campus Tour!"
-          />
+          <View style={styles.campusTourButtonContainer}>
+            <Button
+              onPress={() => navigate('CampusMap')}
+              title="View Campus Map"
+              color="#0f5e00"
+              accessibilityLabel="Go for a Campus Tour!"
+            />
+          </View>
+        </View>
+
+        <View style={styles.settingsContainer}>
+          <View style={styles.settingsContainerBTNContainer}>
+            <Button
+              onPress={() => navigate('Settings')}
+              title="APPLICATION SETTINGS"
+              color="#ffa000"
+              accessibilityLabel="Application Settings"
+            />
           </View>
         </View>
 
@@ -232,6 +243,14 @@ const styles = StyleSheet.create({
   },
   campusTourButtonContainer: {
     marginTop: 20,
+  },
+  settingsContainer:{
+    justifyContent: 'center',
+    flex: 1,
+    paddingTop: 1,
+    padding: 15,
+  },
+  settingsContainerBTNContainer: {
     marginBottom: 30,
   }
 });

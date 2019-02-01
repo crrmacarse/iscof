@@ -1,14 +1,26 @@
 import React from 'react';
 import { ExpoConfigView } from '@expo/samples';
 
-export default class SettingsScreen extends React.Component {
-  static navigationOptions = {
-    title: 'app.json',
-  };
+import {withFirebase} from '../firebase';
 
+class SettingsScreen extends React.Component {
+  
   render() {
     /* Go ahead and delete ExpoConfigView and replace it with your
      * content, we just wanted to give you a quick view of your config */
     return <ExpoConfigView />;
   }
 }
+
+const withFirebaseSettings = withFirebase(SettingsScreen);
+
+withFirebaseSettings.navigationOptions = ({ navigation }) => ({
+  title: 'Application Settings',
+  headerStyle: {
+    backgroundColor: '#ffa000', 
+    borderBottomColor: 'black',
+    borderBottomWidth: 0,
+  },
+});
+
+export default withFirebaseSettings;
