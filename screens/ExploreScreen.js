@@ -39,15 +39,15 @@ class ExploreScreen extends React.Component {
     }
 
     try {
-      let location = await Location.getCurrentPositionAsync({});
+      let location = await Location.getCurrentPositionAsync({ enableHighAccuracy: true });
 
       let where = (await Location.reverseGeocodeAsync(location.coords))[0];
 
-      if(location){
+      if (location) {
         this.setState({
           location,
           where
-         });
+        });
       }
 
     } catch (error) {
@@ -94,9 +94,7 @@ class ExploreScreen extends React.Component {
             zIndex: -1
           }}
           mapType={layer}
-          // minZoomLevel={18}
-          maxZoomLevel={16}
-          // scrollEnabled={false}
+          minZoomLevel={17}
           showsIndoors={false}
           showsTraffic={false}
           showsCompass
@@ -113,6 +111,7 @@ class ExploreScreen extends React.Component {
         >
 
           <Marker
+            pinColor="orange"
             coordinate={location.coords}
             title="You're here"
             description={where.name + " " + where.street + ", " + where.city}
@@ -120,24 +119,26 @@ class ExploreScreen extends React.Component {
 
         </MapView>
 
-        <Picker
-          selectedValue={layer}
-          style={{
-            position: 'absolute',
-            backgroundColor: '#f3f3f3', 
-            color: '#333',
-            width: 75,
-            height: 30,
-            bottom: 10,
-            right: 10,
-            zIndex: 10
-          }}
-          mode="dropdown"
-          onValueChange={(itemValue, itemIndex) => this.setState({ layer: itemValue })}>
-          <Picker.Item label="Default" color="black" value="standard" />
-          <Picker.Item label="Satellite" color="black" value="satellite" />
-        </Picker>
-
+        <View style={{
+          position: 'absolute',
+          backgroundColor: '#f3f3f3',
+          bottom: 10,
+          right: 10,
+          zIndex: 10,
+        }}>
+          <Picker
+            selectedValue={layer}
+            style = {{
+              color: '#333',
+              width: 130,
+              height: 30,
+            }}
+            mode="dropdown"
+            onValueChange={(itemValue, itemIndex) => this.setState({ layer: itemValue })}>
+            <Picker.Item label="Default" color="black" value="standard" />
+            <Picker.Item label="Satellite" color="black" value="satellite" />
+          </Picker>
+        </View>
       </View>
     );
   }
@@ -147,7 +148,7 @@ class ExploreScreen extends React.Component {
 const withFirebaseExplore = withFirebase(ExploreScreen);
 
 withFirebaseExplore.navigationOptions = ({ navigation }) => ({
-  title: 'Campus Navigator',
+  title: 'Explore',
   headerStyle: {
     backgroundColor: '#ffa000',
     borderBottomColor: 'black',

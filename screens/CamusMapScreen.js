@@ -11,42 +11,73 @@ import {
   Modal,
 } from 'react-native';
 
-class MapScreen extends React.Component {
+import Loading from '../components/Loading';
 
+class MapScreen extends React.Component {
   state = {
     modalVisible: false,
+    markers: [],
+    loading: false
   };
 
   setModalVisible(visible) {
     this.setState({ modalVisible: visible });
   }
 
+  componentDidMount() {
+    this.setState({ loading: true });
+
+    this.props.firebase.markers().on('value', snapshot => {
+      const listObject = snapshot.val();
+
+      const markerList = Object.keys(listObject || {}).map(key => ({
+        ...listObject[key],
+        id: key
+      }))
+
+      this.setState({
+        markers: markerList,
+        loading: false,
+      })
+    })
+  }
+
+  componentWillUnmount() {
+    this.props.firebase.markers().off();
+  }
+
   render() {
+    const { markers, loading } = this.state;
+
     return (
       <View style={styles.container}>
         <Modal
           animationType="slide"
           transparent={false}
-          onRequestClose = {() => {
+          onRequestClose={() => {
             console.log("close");
           }}
           visible={this.state.modalVisible}
         >
           <View style={{ flex: 1, justifyContent: 'center', textAlign: 'center', alignItems: 'center' }}>
             <View>
-              <Text style = {{fontSize: 20, margin: 15, fontWeight:'bold'}}>ISCOF Campus Map Directory</Text>
+              <Text style={{ fontSize: 20, margin: 15, fontWeight: 'bold' }}>ISCOF Campus Map Directory</Text>
             </View>
 
-            <View style = {{flexDirection: 'column'}}>
-              <Text style = {{margin: 1, }}>1: Administration</Text>
-              <Text style = {{margin: 1, }}>2: Enterprise</Text>
-              <Text style = {{margin: 1, }}>3: College of Computer Studies</Text>
-              <Text style = {{margin: 1, }}>4: College of Lorem Ipsum</Text>
-              <Text style = {{margin: 1, }}>5: Dolor Sit</Text>
-              <Text style = {{margin: 1, }}>6: Football Field</Text>
+            <View style={{ flexDirection: 'column' }}>
+              {loading && (
+                // style={{alignSelf: 'center', flexDirection: 'column-reverse'}*/}
+                <View style={{ alignSelf: 'stretch', flex: 2, flexGrow: 1 }}>
+                  <Loading />
+                </View>
+              )}
+
+              {markers.map((marker) =>
+                <Text key = {marker.id} style={{ margin: 1, }}>{marker.number}: {marker.name}</Text>
+              )}
             </View>
 
-            <View style = {{marginTop: 25}}>
+            <View style={{ marginTop: 25 }}>
               <TouchableOpacity
                 onPress={() => {
                   this.setModalVisible(!this.state.modalVisible);
