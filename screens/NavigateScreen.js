@@ -1,7 +1,8 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
-const harvesine = require('haversine');
+const haversine = require('haversine');
+const moment = require('moment');
 
 import { withFirebase } from '../firebase';
 
@@ -14,12 +15,13 @@ import {
   Text,
   TouchableOpacity,
   Alert,
+  Platform
 } from 'react-native';
 
 import {
   Permissions,
   Location,
-  Icon,
+  Icon
 } from 'expo';
 
 class NavigateScreen extends React.Component {
@@ -37,16 +39,29 @@ class NavigateScreen extends React.Component {
   _loadMarkers = () => {
     this.setState({ loading: true });
 
+    const { location } = this.state;
+
     this.props.firebase.markers().on('value', snapshot => {
       const listObject = snapshot.val();
+
+      const { location } = this.state;
 
       const markerList = Object.keys(listObject || {}).map(key => ({
         ...listObject[key],
         id: key
       }))
 
+      const finalMarkerList = markerList.map((marker) => {
+        let meterCount = Math.round(haversine(location.coords, marker.coords, { unit: 'meter' }) * 100) / 100;
+        let walkingTime = Math.round(moment.duration((meterCount / 4800), 'hours').asMinutes() * 100) / 100;
+
+        return { ...marker, materCount: meterCount, walkingTime: walkingTime };
+      });
+
+      console.log(finalMarkerList);
+
       this.setState({
-        markers: markerList,
+        markers: finalMarkerList,
         loading: false,
       })
     })
@@ -74,7 +89,9 @@ class NavigateScreen extends React.Component {
         this.setState({
           location,
           loading: false,
-        });
+        },
+          this._loadMarkers
+        );
       }
     } catch (error) {
       Alert.alert(
@@ -93,6 +110,9 @@ class NavigateScreen extends React.Component {
       'number': 1,
       'name': 'Football Field',
       'description': 'Curabitur eleifend tristique lectus vitae finibus. Sed mi lacus, venenatis tempor massa ac, varius convallis massa',
+      'moreInfo':{
+        'dean':'Jose Rizal',
+      },
       'coords': {
         'latitude': 10.8262703,
         'longitude': 122.7115049,
@@ -132,7 +152,6 @@ class NavigateScreen extends React.Component {
 
   componentDidMount() {
     this._getLocationAsync();
-    this._loadMarkers();
   }
 
   componentWillUnmount() {
@@ -144,31 +163,35 @@ class NavigateScreen extends React.Component {
     const { markers, loading, searchVal, location } = this.state;
     const { navigate } = this.props.navigation;
 
-    if (!location) {
+    if (!location && loading) {
       return (
         <View style={{
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <Text style={{ textAlign: 'center' }}>Kindly enable your location services first.</Text>
-          <TouchableOpacity
-            onPress={this._getLocationAsync}>
-            <Text style={{ marginTop: 5 }}>Refresh</Text>
-          </TouchableOpacity>
+          <View style={{ alignSelf: 'stretch', flex: 3, flexGrow: 1 }}>
+            <Loading />
+          </View>
+          <View style={{alignItems: 'center', justifyContent: 'center', padding: 20}}>
+            <Text style={{ textAlign: 'center' }}>Kindly enable your location services first.</Text>
+            <TouchableOpacity
+              onPress={this._getLocationAsync}>
+              <Text style={{ marginTop: 5 }}>Refresh</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       );
     }
 
     return (
       <View style={styles.container}>
-
         <View style={styles.contentContainer}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 5 }}>
             <Icon.Ionicons
-              name="ios-search"
+              name={Platform.OS === 'ios' ? 'ios-search' : 'md-search'}
               size={26}
-              style={{ marginRight: 8}}
+              style={{ marginRight: 8 }}
               color="rgba(15,94,0, 0.5)"
             />
             <Text
@@ -198,21 +221,38 @@ class NavigateScreen extends React.Component {
             accessibilityLabel="Learn more about this purple button"
           />
         </View>
-        {loading && (
-          // style={{alignSelf: 'center', flexDirection: 'column-reverse'}*/}
-          <View style={{ alignSelf: 'stretch', flex: 2, flexGrow: 1 }}>
-            <Loading />
-          </View>
-        )}
         <ScrollView style={styles.containerMarkerMain}>
 
           {markers.map((marker) =>
             <TouchableOpacity onPress={() => navigate('Location', { markername: marker.name, marker })} key={marker.id}>
               <View style={styles.containerMarker}>
                 <Text style={styles.markerTitle}>{marker.name}</Text>
-                <Text style={styles.markerDistanceCount}>
-                  {Math.round(harvesine(location.coords, marker.coords, { unit: 'meter' }) * 100) / 100} m
-                </Text>
+                <View style={{ flexDirection: 'column', alignContent: 'flex-end', justifyContent: 'flex-end' }}>
+
+                  <View style={{ flexDirection: 'row', alignSelf: 'flex-end' }}>
+                    <Icon.Ionicons
+                      name={Platform.OS === 'ios' ? 'ios-compass' : 'md-compass'}
+                      size={15}
+                      style={{ marginRight: 4 }}
+                      color="#333"
+                    />
+                    <Text style={styles.markerDistanceCount}>
+                      {marker.materCount} m
+                  </Text>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', alignSelf: 'flex-end' }}>
+                    <Icon.Ionicons
+                      name={Platform.OS === 'ios' ? 'ios-walk' : 'md-walk'}
+                      size={15}
+                      style={{ marginRight: 4 }}
+                      color="#333"
+                    />
+                    <Text style={styles.markerDistanceCount}>
+                      {marker.walkingTime} minutes
+                  </Text>
+                  </View>
+                </View>
               </View>
             </TouchableOpacity>
           )}
@@ -235,12 +275,11 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   inputBox: {
-    height: 40,
     padding: 10,
-    marginTop: 10,
-    marginBottom: 10,
     borderColor: 'gray',
-    borderWidth: 1
+    borderWidth: 1,
+    height: 50,
+    marginBottom: 5,
   },
   containerMarkerMain: {
     flexGrow: 2,
@@ -249,6 +288,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#d3d3d3',
     padding: 20,
     margin: 10,
+    marginBottom: 3,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center'
@@ -267,7 +307,7 @@ const withFirebaseNavigate = withFirebase(NavigateScreen);
 withFirebaseNavigate.navigationOptions = ({ navigation }) => ({
   title: 'Campus Navigator',
   headerStyle: {
-    backgroundColor: '#ffa000',
+    backgroundColor: '#089EE8',
     borderBottomColor: 'black',
     borderBottomWidth: 0,
   },

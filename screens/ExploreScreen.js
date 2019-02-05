@@ -121,7 +121,7 @@ class ExploreScreen extends React.Component {
 
         <View style={{
           position: 'absolute',
-          backgroundColor: '#f3f3f3',
+          backgroundColor: '#d3d3d3',
           bottom: 10,
           right: 10,
           zIndex: 10,
@@ -150,7 +150,7 @@ const withFirebaseExplore = withFirebase(ExploreScreen);
 withFirebaseExplore.navigationOptions = ({ navigation }) => ({
   title: 'Explore',
   headerStyle: {
-    backgroundColor: '#ffa000',
+    backgroundColor: '#089EE8',
     borderBottomColor: 'black',
     borderBottomWidth: 0,
   },

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ISCOF",
+    "name": "ISCOF Directory",
     "slug": "ISCOF",
     "privacy": "public",
     "sdkVersion": "32.0.0",
@@ -14,7 +14,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#099EE7"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

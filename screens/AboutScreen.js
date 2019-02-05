@@ -25,7 +25,7 @@ export default class AboutScreen extends React.Component {
   static navigationOptions = {
     title: 'ISCOF Circle',
     headerStyle: {
-      backgroundColor: '#ffa000',
+      backgroundColor: '#089EE8',
       borderBottomColor: 'black',
       borderBottomWidth: 0,
     }
@@ -57,17 +57,22 @@ export default class AboutScreen extends React.Component {
       <ScrollView style={styles.container}>
 
         <View style={styles.topContainer}>
-          <Icon.Ionicons
-            style={styles.mainIcon}
-            name={Platform.OS === 'ios' ? 'ios-book' : 'md-book'}
-            size={60}
-          />
+          <View style={{ flexGrow: 1, padding: 10, flexDirection: 'row' }}>
+            <Icon.Ionicons
+              style={styles.mainIcon}
+              name={Platform.OS === 'ios' ? 'ios-book' : 'md-book'}
+              size={60}
+              color = '#0f5e00'
+            />
+          </View>
           <View
             style={styles.mainDivider}
           />
-          <Text style={styles.mainTitle}>
-            Iloilo State College of Science and Technology - Dumangas Campus
-          </Text>
+          <View style ={{alignSelf: 'center', padding: 20}}>
+            <Text style={styles.mainTitle}>
+              Iloilo State College of Science and Technology - Dumangas Campus
+            </Text>
+          </View>
         </View>
 
         <View style={styles.contentContainer}>
@@ -173,31 +178,24 @@ export default class AboutScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 10,
+    flexDirection: 'column',
     backgroundColor: '#fff',
   },
   topContainer: {
-    flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
-    margin: 10,
-    marginBottom: 0,
-  },
-  mainIcon: {
-    marginLeft: 10,
-    color: '#0f5e00',
+    padding: 15,
+    paddingTop: 25,
+    flexWrap: 'nowrap',
   },
   mainDivider: {
     backgroundColor: '#d3d3d3',
     paddingLeft: 1,
-    height: 100,
-    margin: 14,
+    marginLeft: 10,
+    height: "100%",
   },
   mainTitle: {
     fontFamily: 'open-sans-bold',
     fontSize: 16,
-    width: 300,
-
   },
   contentContainer: {
     justifyContent: 'center',
@@ -244,7 +242,7 @@ const styles = StyleSheet.create({
   campusTourButtonContainer: {
     marginTop: 20,
   },
-  settingsContainer:{
+  settingsContainer: {
     justifyContent: 'center',
     flex: 1,
     paddingTop: 1,

@@ -138,7 +138,7 @@ const withFirebaseMap = withFirebase(MapScreen);
 withFirebaseMap.navigationOptions = ({ navigation }) => ({
   title: 'Campus Map',
   headerStyle: {
-    backgroundColor: '#ffa000',
+    backgroundColor: '#089EE8',
     borderBottomColor: 'black',
     borderBottomWidth: 0,
   }

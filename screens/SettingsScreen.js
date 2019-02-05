@@ -17,7 +17,7 @@ const withFirebaseSettings = withFirebase(SettingsScreen);
 withFirebaseSettings.navigationOptions = ({ navigation }) => ({
   title: 'Application Settings',
   headerStyle: {
-    backgroundColor: '#ffa000', 
+    backgroundColor: '#089EE8', 
     borderBottomColor: 'black',
     borderBottomWidth: 0,
   },

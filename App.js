@@ -12,7 +12,6 @@ export default class App extends React.Component {
 
   componentDidMount() {
     Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.ALL);
-
   }
 
   render() {

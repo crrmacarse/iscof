@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
     fontSize: 14,
     textAlign: 'center',
+    lineHeight: 21,
   },
   welcomeContainer: {
     alignItems: 'center',
