@@ -8,9 +8,9 @@ import NavigateScreen from '../screens/NavigateScreen';
 import AboutScreen from '../screens/AboutScreen';
 import ExploreScreen from '../screens/ExploreScreen';
 import CamusMapScreen from '../screens/CamusMapScreen';
-import SettingsScreen from '../screens/SettingsScreen';
 import LocationScreen from '../screens/LocationScreen';
-
+import SettingsScreen from '../screens/Settings';
+import LocationSettingsScreen from '../screens/Settings/locationmap';
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
 });
@@ -67,6 +67,7 @@ const AboutStack = createStackNavigator({
   About: AboutScreen,
   CampusMap: CamusMapScreen,
   Settings: SettingsScreen,
+  LocationSettings: LocationSettingsScreen
 });
 
 AboutStack.navigationOptions = {

@@ -44,8 +44,6 @@ class NavigateScreen extends React.Component {
     this.props.firebase.markers().on('value', snapshot => {
       const listObject = snapshot.val();
 
-      const { location } = this.state;
-
       const markerList = Object.keys(listObject || {}).map(key => ({
         ...listObject[key],
         id: key
@@ -57,9 +55,6 @@ class NavigateScreen extends React.Component {
 
         return { ...marker, materCount: meterCount, walkingTime: walkingTime };
       });
-
-      console.log(finalMarkerList);
-
       this.setState({
         markers: finalMarkerList,
         loading: false,
@@ -68,8 +63,6 @@ class NavigateScreen extends React.Component {
   }
 
   _getLocationAsync = async () => {
-    this.setState({ loading: true });
-
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
 
     if (status !== 'granted') {
@@ -88,7 +81,6 @@ class NavigateScreen extends React.Component {
       if (location) {
         this.setState({
           location,
-          loading: false,
         },
           this._loadMarkers
         );
@@ -163,7 +155,7 @@ class NavigateScreen extends React.Component {
     const { markers, loading, searchVal, location } = this.state;
     const { navigate } = this.props.navigation;
 
-    if (!location && loading) {
+    if (!location || loading) {
       return (
         <View style={{
           flex: 1,
@@ -279,6 +271,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     height: 50,
+    marginTop: 5,
     marginBottom: 5,
   },
   containerMarkerMain: {

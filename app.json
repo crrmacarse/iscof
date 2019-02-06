@@ -4,6 +4,9 @@
     "slug": "ISCOF",
     "privacy": "public",
     "sdkVersion": "32.0.0",
+    "android": { 
+      "package": "com.crrmacarse.iscof" 
+    },
     "platforms": [
       "ios",
       "android"
@@ -13,7 +16,7 @@
     "icon": "./assets/images/icon.png",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#099EE7"
     },
     "updates": {

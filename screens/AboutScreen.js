@@ -163,7 +163,7 @@ export default class AboutScreen extends React.Component {
           <View style={styles.settingsContainerBTNContainer}>
             <Button
               onPress={() => navigate('Settings')}
-              title="APPLICATION SETTINGS"
+              title="Application Settings"
               color="#ffa000"
               accessibilityLabel="Application Settings"
             />
