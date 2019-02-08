@@ -15,7 +15,7 @@ import {
   Modal,
   Platform,
   TouchableWithoutFeedback,
-  Image
+  Image,
 } from 'react-native';
 
 import {
@@ -31,6 +31,7 @@ class SettingsScreen extends React.Component {
       selectedMarker: [],
       searchVal: '',
       loading: false,
+      action: 'action',
       modalVisible: false
     }
   }
@@ -40,7 +41,7 @@ class SettingsScreen extends React.Component {
 
     const markerList = [];
 
-    await this.props.firebase.markersTest().get()
+    await this.props.firebase.markers().get()
       .then(querySnapshot => {
         querySnapshot.docs.forEach(doc => {
           markerList.push(doc.data());
@@ -73,9 +74,9 @@ class SettingsScreen extends React.Component {
       selectedMarker: [],
     })
   }
-
+  
   _storeExample = () => {
-    this.props.firebase.markersTest().add({
+    this.props.firebase.markers().add({
       'number': 1,
       'name': 'Football Field',
       'description': 'Curabitur eleifend tristique lectus vitae finibus. Sed mi lacus, venenatis tempor massa ac, varius convallis massa',
@@ -97,44 +98,53 @@ class SettingsScreen extends React.Component {
       });
   }
 
-  _handleSearch = () => {
-    this.setState({ loading: true });
-    this._loadMarkers();
-    const { markers, searchVal } = this.state;
-    console.log('Markers is : ' + JSON.stringify(markers));
-    const resultMarker = [];
-
-    // resultMarker = markers.filter(marker => {
-    //   return Object.keys(marker).some(key => marker[key].toString()).search(searchVal.toLowerCase() !== -1);
-    // })
-
-    markers.filter(marker => {
-      console.log(marker.name.toLowerCase() + " == " + searchVal.toLowerCase())
-      if (marker.name.toLowerCase() === searchVal.toLowerCase()) {
-        resultMarker.push(marker);
-        console.log("hello", marker.name);
-      }
-    })
-
-    if (resultMarker && resultMarker.length) {
-      console.log("yes");
-      this.setState({
-        markers: resultMarker,
-        loading: false,
-      })
+  _handleSearch = async () => {
+    const { location, searchVal } = this.state;
+    
+    if(!searchVal) { 
+      this._loadMarkers();
+      return
     }
+
+    this.setState({ loading: true });
+
+
+    const markerList = [];
+
+    await this.props.firebase.markers().where("tags", "array-contains", searchVal.toLowerCase()).get()
+      .then(querySnapshot => {
+        querySnapshot.docs.forEach(doc => {
+          markerList.push(doc.data());
+        });
+
+        const listMarker = Object.keys(markerList || {}).map(key => ({
+          ...markerList[key],
+          id: key
+        }))
+
+        this.setState({
+          markers: listMarker,
+          loading: false
+        });
+      }).catch(error => {
+        Alert.alert(
+          'Internal Error',
+          error.message,
+          [
+            { text: 'OK' },
+          ],
+          { cancelable: false }
+        )
+    });
+
   }
 
   componentDidMount() {
     this._loadMarkers();
   }
 
-  componentWillUnmount() {
-    this.props.firebase.markersTest().off();
-  }
-
   render() {
-    const { markers, selectedMarker, modalVisible, loading, searchVal } = this.state;
+    const { markers, selectedMarker, modalVisible, loading, searchVal, action } = this.state;
     const { navigate } = this.props.navigation;
 
     console.log(selectedMarker);
@@ -156,38 +166,34 @@ class SettingsScreen extends React.Component {
       <View style={styles.container}>
         <View style={styles.contentContainer}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 5 }}>
-            <Icon.Ionicons
-              name={Platform.OS === 'ios' ? 'ios-search' : 'md-search'}
-              size={26}
-              style={{ marginRight: 8 }}
-              color="rgba(15,94,0, 0.5)"
-            />
-            <Text
-              style={{
-                textAlign: 'center',
-                fontSize: 18,
-                letterSpacing: 0.75,
-                color: "#666"
-              }}
-              onPress={this._storeExample}>
-              The ISCOF Navigator
-           </Text>
+            <View style={{ flexGrow: 1, marginRight: 5 }}>
+              <TextInput
+                onChangeText={(text) => this.setState({ searchVal: text })}
+                placeholder="Search"
+                style={styles.inputBox}
+                onSubmitEditing={this._handleSearch}
+                name="searchVal"
+                value={searchVal}
+              />
+            </View>
+            <View style={{ flexShrink: 1, marginRight: 2 }}>
+              <Button
+                onPress={this._handleSearch}
+                title="Search"
+                color="#0f5e00"
+                accessibilityLabel="Search"
+              />
+            </View>
+            <View style={{ flexShrink: 1 }}>
+              <Button
+                onPress={this._handleSearch}
+                title="New"
+                color="#ffa000"
+                accessibilityLabel="Search"
+              />
+            </View>
           </View>
 
-          <TextInput
-            onChangeText={(text) => this.setState({ searchVal: text })}
-            placeholder="Search"
-            style={styles.inputBox}
-            onSubmitEditing={this._handleSearch}
-            name="searchVal"
-            value={searchVal}
-          />
-          <Button
-            onPress={this._handleSearch}
-            title="Search"
-            color="#0f5e00"
-            accessibilityLabel="Learn more about this purple button"
-          />
         </View>
         <ScrollView style={styles.containerMarkerMain}>
           {markers.map((marker) =>
@@ -201,7 +207,16 @@ class SettingsScreen extends React.Component {
                 <Text style={styles.markerTitle}>{marker.name}</Text>
                 <View style={{ flexDirection: 'column', alignContent: 'flex-end', justifyContent: 'flex-end' }}>
                 </View>
+                <View style={{ flexDirection: 'row', alignSelf: 'flex-end' }}>
+                  <Icon.Ionicons
+                    name={Platform.OS === 'ios' ? 'ios-create' : 'md-create'}
+                    size={20}
+                    style={{ marginRight: 4 }}
+                    color="#333"
+                  />
+                </View>
               </View>
+
             </TouchableOpacity>
           )}
         </ScrollView>
@@ -337,19 +352,19 @@ class SettingsScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 15,
+    paddingTop: 10,
     flexDirection: 'column',
     alignItems: 'stretch',
     backgroundColor: '#fff',
   },
   contentContainer: {
-    padding: 8,
+    padding: 5,
   },
   inputBox: {
     padding: 10,
     borderColor: 'gray',
     borderWidth: 1,
-    height: 50,
+    height: 35,
     marginTop: 5,
     marginBottom: 5,
   },

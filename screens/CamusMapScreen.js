@@ -25,25 +25,39 @@ class MapScreen extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({ loading: true });
-
-    this.props.firebase.markers().on('value', snapshot => {
-      const listObject = snapshot.val();
-
-      const markerList = Object.keys(listObject || {}).map(key => ({
-        ...listObject[key],
-        id: key
-      }))
-
-      this.setState({
-        markers: markerList,
-        loading: false,
-      })
-    })
+    this._loadMarkers();
   }
 
-  componentWillUnmount() {
-    this.props.firebase.markers().off();
+  _loadMarkers = async () => {
+    this.setState({ loading: true });
+
+    const markerList = [];
+
+    await this.props.firebase.markers().get()
+      .then(querySnapshot => {
+        querySnapshot.docs.forEach(doc => {
+          markerList.push(doc.data());
+        });
+
+        const listMarker = Object.keys(markerList || {}).map(key => ({
+          ...markerList[key],
+          id: key
+        }))
+
+        this.setState({
+          markers: listMarker,
+          loading: false
+        });
+      }).catch(error => {
+        Alert.alert(
+          'Internal Error',
+          error.message,
+          [
+            { text: 'OK' },
+          ],
+          { cancelable: false }
+        )
+      });
   }
 
   render() {
@@ -73,7 +87,7 @@ class MapScreen extends React.Component {
               )}
 
               {markers.map((marker) =>
-                <Text key = {marker.id} style={{ margin: 1, }}>{marker.number}: {marker.name}</Text>
+                <Text key={marker.id} style={{ margin: 1, }}>{marker.number}: {marker.name}</Text>
               )}
             </View>
 

@@ -36,6 +36,8 @@ class LocationScreen extends React.Component {
     name: null,
     description: null,
     number: null,
+    materCount: null,
+    walkingTime: null,
     loading: true,
     layer: 'satellite',
     tags: [],
@@ -67,6 +69,8 @@ class LocationScreen extends React.Component {
       name: marker.name,
       description: marker.description,
       number: marker.number,
+      materCount: marker.materCount,
+      walkingTime: marker.walkingTime,
       tags: marker.tags,
       moreInfo: marker.moreInfo,
       loading: false,
@@ -87,7 +91,17 @@ class LocationScreen extends React.Component {
   }
 
   render() {
-    const { location, layer, name, description, number, moreInfo, tags, loading, } = this.state;
+
+    const { location,
+      layer,
+      name,
+      description,
+      number,
+      materCount,
+      moreInfo,
+      tags,
+      loading,
+    } = this.state;
 
     if (!location) {
       return (
@@ -146,7 +160,7 @@ class LocationScreen extends React.Component {
           <TouchableWithoutFeedback onPress={() => this.setModalVisible(false)}>
             <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-end' }}>
               <View style={{ paddingTop: 25, paddingBottom: 25, width: '100%', backgroundColor: '#fff', justifyContent: "center", alignItems: 'center' }}>
-                <View style={{ alignItems: 'center', flexDirection: 'row', marginBottom: 10 }}>
+                <View style={{ alignItems: 'center', flexDirection: 'row', marginBottom: 5 }}>
                   <Text style={{
                     fontSize: 15,
                     color: '#b3b3b3',
@@ -160,6 +174,33 @@ class LocationScreen extends React.Component {
                     fontSize: 18,
                   }}>
                     {name}</Text>
+                </View>
+
+                <View style={{ flexDirection: 'row', marginBottom: 20}}>
+                  <View style={{ flexDirection: 'row'}}>
+                    <Icon.Ionicons
+                      name={Platform.OS === 'ios' ? 'ios-compass' : 'md-compass'}
+                      size={15}
+                      style={{ marginRight: 4 }}
+                      color="#333"
+                    />
+                    <Text style={{ fontSize: 12 }}>
+                      {materCount} m
+                    </Text>
+                  </View>
+                  <Text style={{ paddingLeft: 2, backgroundColor: "#d3d3d3", marginLeft: 10, marginRight: 10 }}>
+                  </Text>
+                  <View style={{ flexDirection: 'row' }}>
+                    <Icon.Ionicons
+                      name={Platform.OS === 'ios' ? 'ios-walk' : 'md-walk'}
+                      size={15}
+                      style={{ marginRight: 4 }}
+                      color="#333"
+                    />
+                    <Text style={{ fontSize: 12 }}>
+                      {materCount} m
+                    </Text>
+                  </View>
                 </View>
 
                 <View style={{ alignItems: 'center', flexDirection: 'row', marginBottom: 5 }}>

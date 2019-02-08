@@ -36,30 +36,44 @@ class NavigateScreen extends React.Component {
     }
   }
 
-  _loadMarkers = () => {
+  _loadMarkers = async () => {
     this.setState({ loading: true });
 
     const { location } = this.state;
+    const markerList = [];
 
-    this.props.firebase.markers().on('value', snapshot => {
-      const listObject = snapshot.val();
+    await this.props.firebase.markers().get()
+      .then(querySnapshot => {
+        querySnapshot.docs.forEach(doc => {
+          markerList.push(doc.data());
+        });
 
-      const markerList = Object.keys(listObject || {}).map(key => ({
-        ...listObject[key],
-        id: key
-      }))
+        const listMarker = Object.keys(markerList || {}).map(key => ({
+          ...markerList[key],
+          id: key
+        }))
 
-      const finalMarkerList = markerList.map((marker) => {
-        let meterCount = Math.round(haversine(location.coords, marker.coords, { unit: 'meter' }) * 100) / 100;
-        let walkingTime = Math.round(moment.duration((meterCount / 4800), 'hours').asMinutes() * 100) / 100;
+        const finalMarkerList = listMarker.map((marker) => {
+          let meterCount = Math.round(haversine(location.coords, marker.coords, { unit: 'meter' }) * 100) / 100;
+          let walkingTime = Math.round(moment.duration((meterCount / 4800), 'hours').asMinutes() * 100) / 100;
 
-        return { ...marker, materCount: meterCount, walkingTime: walkingTime };
+          return { ...marker, materCount: meterCount, walkingTime: walkingTime };
+        });
+
+        this.setState({
+          markers: finalMarkerList,
+          loading: false
+        });
+      }).catch(error => {
+        Alert.alert(
+          'Internal Error',
+          error.message,
+          [
+            { text: 'OK' },
+          ],
+          { cancelable: false }
+        )
       });
-      this.setState({
-        markers: finalMarkerList,
-        loading: false,
-      })
-    })
   }
 
   _getLocationAsync = async () => {
@@ -97,57 +111,56 @@ class NavigateScreen extends React.Component {
     }
   }
 
-  _storeExample = () => {
-    this.props.firebase.markers().push({
-      'number': 1,
-      'name': 'Football Field',
-      'description': 'Curabitur eleifend tristique lectus vitae finibus. Sed mi lacus, venenatis tempor massa ac, varius convallis massa',
-      'moreInfo':{
-        'dean':'Jose Rizal',
-      },
-      'coords': {
-        'latitude': 10.8262703,
-        'longitude': 122.7115049,
-      },
-      'tags': ["admin", "president", "office"],
-      'status': 'active',
-    });
-  }
-
-  _handleSearch = () => {
-    this.setState({ loading: true });
-    this._loadMarkers();
-    const { markers, searchVal } = this.state;
-    console.log('Markers is : ' + JSON.stringify(markers));
-    const resultMarker = [];
-
-    // resultMarker = markers.filter(marker => {
-    //   return Object.keys(marker).some(key => marker[key].toString()).search(searchVal.toLowerCase() !== -1);
-    // })
-
-    markers.filter(marker => {
-      console.log(marker.name.toLowerCase() + " == " + searchVal.toLowerCase())
-      if (marker.name.toLowerCase() === searchVal.toLowerCase()) {
-        resultMarker.push(marker);
-        console.log("hello", marker.name);
-      }
-    })
-
-    if (resultMarker && resultMarker.length) {
-      console.log("yes");
-      this.setState({
-        markers: resultMarker,
-        loading: false,
-      })
+  _handleSearch = async () => {
+    const { location, searchVal } = this.state;
+    
+    if(!searchVal) { 
+      this._loadMarkers();
+      return
     }
+
+    this.setState({ loading: true });
+
+
+    const markerList = [];
+
+    await this.props.firebase.markers().where("tags", "array-contains", searchVal.toLowerCase()).get()
+      .then(querySnapshot => {
+        querySnapshot.docs.forEach(doc => {
+          markerList.push(doc.data());
+        });
+
+        const listMarker = Object.keys(markerList || {}).map(key => ({
+          ...markerList[key],
+          id: key
+        }))
+
+        const finalMarkerList = listMarker.map((marker) => {
+          let meterCount = Math.round(haversine(location.coords, marker.coords, { unit: 'meter' }) * 100) / 100;
+          let walkingTime = Math.round(moment.duration((meterCount / 4800), 'hours').asMinutes() * 100) / 100;
+
+          return { ...marker, materCount: meterCount, walkingTime: walkingTime };
+        });
+
+        this.setState({
+          markers: finalMarkerList,
+          loading: false
+        });
+      }).catch(error => {
+        Alert.alert(
+          'Internal Error',
+          error.message,
+          [
+            { text: 'OK' },
+          ],
+          { cancelable: false }
+        )
+    });
+
   }
 
   componentDidMount() {
     this._getLocationAsync();
-  }
-
-  componentWillUnmount() {
-    this.props.firebase.markers().off();
   }
 
   render() {
@@ -165,7 +178,7 @@ class NavigateScreen extends React.Component {
           <View style={{ alignSelf: 'stretch', flex: 3, flexGrow: 1 }}>
             <Loading />
           </View>
-          <View style={{alignItems: 'center', justifyContent: 'center', padding: 20}}>
+          <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
             <Text style={{ textAlign: 'center' }}>Kindly enable your location services first.</Text>
             <TouchableOpacity
               onPress={this._getLocationAsync}>
@@ -192,8 +205,7 @@ class NavigateScreen extends React.Component {
                 fontSize: 18,
                 letterSpacing: 0.75,
                 color: "#666"
-              }}
-              onPress={this._storeExample}>
+              }}>
               The ISCOF Navigator
            </Text>
           </View>
