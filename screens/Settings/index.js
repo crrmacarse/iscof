@@ -1,11 +1,12 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-
 import { withFirebase } from '../../firebase';
 
 import Loading from '../../components/Loading';
+import BigTextInput from '../../components/BigTextInput';
 
 import {
+  ScrollView,
+  StyleSheet,
   View,
   Button,
   TextInput,
@@ -22,17 +23,37 @@ import {
   Icon
 } from 'expo';
 
+const INITIAL_SELECTED_STATE = {
+  data: {
+    number: null,
+    name: null,
+    description: null,
+    moreInfo: {
+      dean: null,
+    },
+    coords: {
+      latitude: null,
+      longitude: null,
+    },
+    tags: [],
+    status: 'active',
+  },
+  id: null
+}
+
 class SettingsScreen extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       markers: [],
-      selectedMarker: [],
+      selectedMarker: [], // check for error. spread operator problem
       searchVal: '',
+      modalEditClose: false,
+      modalAddVisible: false,
+      withAccess: false,
+      accessVal: null,
       loading: false,
-      action: 'action',
-      modalVisible: false
     }
   }
 
@@ -41,21 +62,20 @@ class SettingsScreen extends React.Component {
 
     const markerList = [];
 
-    await this.props.firebase.markers().get()
+    await this.props.firebase.markers().orderBy("name").get()
       .then(querySnapshot => {
         querySnapshot.docs.forEach(doc => {
-          markerList.push(doc.data());
+          markerList.push({
+            id: doc.id,
+            data: doc.data(),
+          });
         });
-
-        const listMarker = Object.keys(markerList || {}).map(key => ({
-          ...markerList[key],
-          id: key
-        }))
 
         this.setState({
-          markers: listMarker,
+          markers: markerList,
           loading: false
         });
+
       }).catch(error => {
         Alert.alert(
           'Internal Error',
@@ -68,18 +88,89 @@ class SettingsScreen extends React.Component {
       });
   }
 
-  _setModalClose = () => {
+  _setModalAddClose = () => {
     this.setState({
-      modalVisible: false,
+      modalAddVisible: false,
       selectedMarker: [],
     })
   }
-  
+
+  _setModalEditClose = () => {
+    this.setState({
+      modalEditClose: false,
+      selectedMarker: [],
+    })
+  }
+
+  _addMarker = () => {
+    const { markers, selectedMarker } = this.state;
+
+    this.props.firebase.markers().add({
+      'number': selectedMarker.number,
+      'name': selectedMarker.name,
+      'description': selectedMarker.description,
+      'moreInfo': {
+        'dean': selectedMarker.dean,
+      },
+      'coords': {
+        'latitude': selectedMarker.latitude,
+        'longitude': selectedMarker.longitude,
+      },
+      'tags': selectedMarker.tags,
+      'status': selectedMarker.status,
+    })
+      .then((docRef) => {
+        Alert.alert(
+          'Succesfully Added ',
+          'Reference id: ' + docRef.id,
+          [
+            { text: 'OK' },
+          ],
+          { cancelable: false }
+        )
+        markers.push(selectedMarker);
+        this.props.navigation.navigate('LocationSettings', { marker });
+      })
+      .catch((error) => {
+        Alert.alert(
+          'There seems to be an error in Adding',
+          error.message,
+          [
+            { text: 'OK' },
+          ],
+          { cancelable: false }
+        )
+      });
+  }
+
+  _deleteMarker = (id) => {
+    this.props.firebase.marker(id).delete().then(() => {
+      Alert.alert(
+        'Succesfully Deleted ',
+        [
+          { text: 'OK' },
+        ],
+        { cancelable: false }
+      )
+      this._setModalEditClose();
+      this._loadMarkers();
+    }).catch((error) => {
+      Alert.alert(
+        'There seems to be an error in Deleting',
+        error.message,
+        [
+          { text: 'OK' },
+        ],
+        { cancelable: false }
+      )
+    });
+  }
+
   _storeExample = () => {
     this.props.firebase.markers().add({
-      'number': 1,
-      'name': 'Football Field',
-      'description': 'Curabitur eleifend tristique lectus vitae finibus. Sed mi lacus, venenatis tempor massa ac, varius convallis massa',
+      'number': 4,
+      'name': 'College of Theology',
+      'description': 'Tempor massa ac, varius convallis massa',
       'moreInfo': {
         'dean': 'Jose Rizal',
       },
@@ -100,8 +191,8 @@ class SettingsScreen extends React.Component {
 
   _handleSearch = async () => {
     const { location, searchVal } = this.state;
-    
-    if(!searchVal) { 
+
+    if (!searchVal) {
       this._loadMarkers();
       return
     }
@@ -135,8 +226,23 @@ class SettingsScreen extends React.Component {
           ],
           { cancelable: false }
         )
-    });
+      });
 
+  }
+
+  _handleAccess = () => {
+    const { accessVal } = this.state;
+
+    accessVal === "1957"
+      ? this.setState({ withAccess: true })
+      : Alert.alert(
+        'Warning',
+        'Incorrect Password',
+        [
+          { text: 'OK' },
+        ],
+        { cancelable: false }
+      )
   }
 
   componentDidMount() {
@@ -144,21 +250,80 @@ class SettingsScreen extends React.Component {
   }
 
   render() {
-    const { markers, selectedMarker, modalVisible, loading, searchVal, action } = this.state;
+    const {
+      markers,
+      selectedMarker,
+      modalEditClose,
+      modalAddVisible,
+      loading,
+      searchVal,
+      accessVal,
+      withAccess
+    } = this.state;
+
     const { navigate } = this.props.navigation;
 
-    console.log(selectedMarker);
+    const renderAccessControl = (
+
+      <View style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <View style={{ alignSelf: 'center', width: "60%" }}>
+          <Text style={{
+            color: "grey"
+          }}
+          onPress= {() => {
+            this._storeExample();
+          }}
+          >
+            ISCOF - Dumangas Password
+          </Text>
+          <TextInput
+            onChangeText={(text) => this.setState({ accessVal: text })}
+            placeholder="Password"
+            style={styles.inputBox}
+            onSubmitEditing={this._handleAccess}
+            name="accessVal"
+            value={accessVal}
+          />
+          <Button
+            onPress={this._handleAccess}
+            title="Submit"
+            color="orange"
+            accessibilityLabel="Submit"
+          />
+
+        </View>
+      </View>
+    )
+
+    const renderLoading = (
+      <View style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <View style={{ alignSelf: 'stretch', flex: 3, flexGrow: 1 }}>
+          <Loading />
+        </View>
+      </View>
+    )
+
+    /* 
+       Validate Component states
+    */
+
+    if (!withAccess) {
+      return (
+        renderAccessControl
+      );
+    }
+
     if (loading) {
       return (
-        <View style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <View style={{ alignSelf: 'stretch', flex: 3, flexGrow: 1 }}>
-            <Loading />
-          </View>
-        </View>
+        renderLoading
       );
     }
 
@@ -186,25 +351,30 @@ class SettingsScreen extends React.Component {
             </View>
             <View style={{ flexShrink: 1 }}>
               <Button
-                onPress={this._handleSearch}
+                onPress={() => {
+                  this.setState({
+                    modalAddVisible: true
+                  })
+                }}
                 title="New"
                 color="#ffa000"
-                accessibilityLabel="Search"
+                accessibilityLabel="New"
               />
             </View>
           </View>
 
         </View>
+
         <ScrollView style={styles.containerMarkerMain}>
           {markers.map((marker) =>
             <TouchableOpacity onPress={() => {
               this.setState({
-                modalVisible: true,
+                modalEditClose: true,
                 selectedMarker: [marker]
               })
             }} key={marker.id}>
               <View style={styles.containerMarker}>
-                <Text style={styles.markerTitle}>{marker.name}</Text>
+                <Text style={styles.markerTitle}>{marker.data.name}</Text>
                 <View style={{ flexDirection: 'column', alignContent: 'flex-end', justifyContent: 'flex-end' }}>
                 </View>
                 <View style={{ flexDirection: 'row', alignSelf: 'flex-end' }}>
@@ -221,6 +391,8 @@ class SettingsScreen extends React.Component {
           )}
         </ScrollView>
 
+        {/* Add Modal */}
+
         <Modal
           animationType="slide"
           transparent={false}
@@ -228,7 +400,193 @@ class SettingsScreen extends React.Component {
           onRequestClose={() => {
             this._setModalClose()
           }}
-          visible={modalVisible}
+          visible={modalAddVisible}
+        >
+          <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+
+            <View style={{ backgroundColor: '#fff', alignItems: 'stretch' }}>
+
+              <View stlye={{ alignSelf: 'flex-start' }}>
+                <Text style={{
+                  fontSize: 30,
+                  margin: 15,
+                  fontWeight: "bold",
+                  textAlign: "center"
+                }}>
+                  New Location
+              </Text>
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, alignItems: 'center' }}>
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 20,
+                    marginRight: 5,
+                  }}>
+                  Number:
+                 </Text>
+                <TextInput
+                  onChangeText={(text) => this.setState({ [selectedMarker.name]: text })}
+                  style={{
+                    padding: 10,
+                    borderColor: 'gray',
+                    borderWidth: 1,
+                    height: 35,
+                    marginTop: 5,
+                    marginBottom: 5,
+                    width: 200,
+                  }}
+                  name="currMarkerName"
+                  value={selectedMarker.name}
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, alignItems: 'center' }}>
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 20,
+                    marginRight: 5,
+                  }}>
+                  Name:
+                 </Text>
+                <TextInput
+                  onChangeText={(text) => this.setState({ [selectedMarker.name]: text })}
+                  style={{
+                    padding: 10,
+                    borderColor: 'gray',
+                    borderWidth: 1,
+                    height: 35,
+                    marginTop: 5,
+                    marginBottom: 5,
+                    width: 200,
+                  }}
+                  name="currMarkerName"
+                  value={selectedMarker.name}
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, alignItems: 'center' }}>
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 20,
+                    marginRight: 5,
+                  }}>
+                  Description:
+                 </Text>
+                <View style={{
+                  borderColor: 'grey',
+                  borderWidth: 1,
+                  width: "50%",
+                  flexGrow: 1
+                }}
+                >
+                  <BigTextInput
+                    multiline={true}
+                    numberOfLines={4}
+                    onChangeText={(text) => this.setState({ text })}
+                    value={selectedMarker.description}
+                  />
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, alignItems: 'center' }}>
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 20,
+                    marginRight: 5,
+                  }}>
+                  Dean:
+                 </Text>
+                <TextInput
+                  onChangeText={(text) => this.setState({ [selectedMarker.name]: text })}
+                  style={{
+                    padding: 10,
+                    borderColor: 'gray',
+                    borderWidth: 1,
+                    height: 35,
+                    marginTop: 5,
+                    marginBottom: 5,
+                    width: 200,
+                  }}
+                  name="currMarkerName"
+                  value={selectedMarker.name}
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, alignItems: 'center' }}>
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 20,
+                    marginRight: 5,
+                  }}>
+                  Tags:
+                 </Text>
+                <TextInput
+                  onChangeText={(text) => this.setState({ [selectedMarker.name]: text })}
+                  style={{
+                    padding: 10,
+                    borderColor: 'gray',
+                    borderWidth: 1,
+                    height: 35,
+                    marginTop: 5,
+                    marginBottom: 5,
+                    width: 200,
+                  }}
+                  name="currMarkerName"
+                  value={selectedMarker.name}
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 20 }}>
+                < View style={{
+                  margin: 3,
+                }}
+                >
+                  <Button
+                    onPress={() => {
+                      this._addMarker();
+                    }}
+                    title="Add"
+                    color="#ffa000"
+                    accessibilityLabel="Add"
+                  />
+                </View>
+
+                < View style={{
+                  margin: 3
+                }}
+                >
+                  <Button
+                    onPress={() => {
+                      this._setModalAddClose();
+                    }}
+                    title="Close"
+                    color="#333"
+                    accessibilityLabel="Close"
+                  />
+                </ View>
+
+              </View>
+
+            </View>
+          </View>
+        </Modal>
+
+        {/* Edit Modal */}
+
+        <Modal
+          animationType="slide"
+          transparent={false}
+          presentationStyle="fullScreen"
+          onRequestClose={() => {
+            this._setModalClose()
+          }}
+          visible={modalEditClose}
         >
           <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
 
@@ -241,14 +599,14 @@ class SettingsScreen extends React.Component {
                     color: '#b3b3b3',
                     marginRight: 6,
                   }}>
-                    {marker.number}.
+                    {marker.data.number}.
                 </Text>
 
                   <Text style={{
                     fontWeight: 'bold',
                     fontSize: 18,
                   }}>
-                    {marker.name}</Text>
+                    {marker.data.name}</Text>
                 </View>
 
                 <View style={{ alignItems: 'center', flexDirection: 'row', marginBottom: 5 }}>
@@ -273,10 +631,10 @@ class SettingsScreen extends React.Component {
                   <Text style={{
                     textAlign: 'center',
                     fontStyle: 'italic'
-                  }}>{marker.description}</Text>
+                  }}>{marker.data.description}</Text>
                 </View>
 
-                {marker.moreInfo &&
+                {marker.data.moreInfo &&
                   <View style={{
                     alignItems: 'center',
                     padding: 3,
@@ -286,12 +644,12 @@ class SettingsScreen extends React.Component {
                       fontSize: 12,
                       letterSpacing: 0.5,
                       color: "#585858"
-                    }}>Dean: {marker.moreInfo.dean}</Text>
+                    }}>Dean: {marker.data.moreInfo.dean}</Text>
                   </View>
                 }
 
                 < View style={{ flexDirection: 'row', marginTop: 15 }}>
-                  {marker.tags.map((tag, index) =>
+                  {marker.data.tags.map((tag, index) =>
                     <Text key={index}
                       style={{
                         backgroundColor: "#d3d3d3",
@@ -307,35 +665,65 @@ class SettingsScreen extends React.Component {
                 </View>
 
                 <View style={{ flexDirection: 'row', marginTop: 20 }}>
-                  <TouchableOpacity
-                    style={{
-                      margin: 4
-                    }}
-                    onPress={() => {
-                      this._setModalClose();
-                      navigate('LocationSettings', { marker });
-                    }
-                    }>
-                    <Text>Edit Location</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      margin: 4
-                    }}
-                    onPress={() => {
-                      this._setModalClose();
-                    }}>
-                    <Text>Save</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      margin: 4
-                    }}
-                    onPress={() => {
-                      this._setModalClose();
-                    }}>
-                    <Text>Close</Text>
-                  </TouchableOpacity>
+
+                  < View style={{
+                    margin: 3,
+                  }}
+                  >
+                    <Button
+                      onPress={() => {
+                        this._addMarker();
+                      }}
+                      title="Save"
+                      color="green"
+                      accessibilityLabel="Save"
+                    />
+                  </View>
+
+                  < View style={{
+                    margin: 3
+                  }}
+                  >
+                    <Button
+                      onPress={() => {
+                        this._setModalEditClose();
+                        navigate('LocationSettings', { marker });
+                      }}
+                      title="Edit Location"
+                      color="blue"
+                      accessibilityLabel="Edit Location"
+                    />
+                  </ View>
+
+                  < View style={{
+                    margin: 3
+                  }}
+                  >
+                    <Button
+                      onPress={() => {
+                        this._deleteMarker(marker.id);
+                      }}
+                      title="Delete"
+                      color="red"
+                      accessibilityLabel="Delete"
+                    />
+                  </ View>
+
+                  < View style={{
+                    margin: 3
+                  }}
+                  >
+                    <Button
+                      onPress={() => {
+                        this._setModalEditClose();
+                      }}
+                      title="Close"
+                      color="#333"
+                      accessibilityLabel="Close"
+                    />
+                  </ View>
+
+
                 </View>
 
               </View>

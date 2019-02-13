@@ -33,7 +33,7 @@ class MapScreen extends React.Component {
 
     const markerList = [];
 
-    await this.props.firebase.markers().get()
+    await this.props.firebase.markers().orderBy("number").get()
       .then(querySnapshot => {
         querySnapshot.docs.forEach(doc => {
           markerList.push(doc.data());
