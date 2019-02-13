@@ -98,6 +98,7 @@ class LocationScreen extends React.Component {
       description,
       number,
       materCount,
+      walkingTime,
       moreInfo,
       tags,
       loading,
@@ -198,7 +199,7 @@ class LocationScreen extends React.Component {
                       color="#333"
                     />
                     <Text style={{ fontSize: 12 }}>
-                      {materCount} m
+                      {walkingTime} minutes
                     </Text>
                   </View>
                 </View>
