@@ -11,6 +11,8 @@ import {
   Button
 } from 'react-native';
 
+import { NavigationActions } from 'react-navigation';
+
 import {
   MapView,
 } from 'expo';
@@ -57,7 +59,7 @@ class LocationSettingsScreen extends React.Component {
     })
   }
 
-  _saveNewLocation = () => {
+  _saveLocation = () => {
     const { markerId, location } = this.state;
 
     this.props.firebase.marker(markerId).update({
@@ -67,17 +69,21 @@ class LocationSettingsScreen extends React.Component {
       }
     }).then(() => {
       Alert.alert(
-        'Succesfully Updated',
+        'Success',
+        'Succesfully updated map location',
         [
-          { text: 'OK' },
+          {text: 'OK', onPress: () => {
+            this.props.navigation.state.params._loadMarkers();
+            this.props.navigation.dispatch(NavigationActions.back())        
+          }},
         ],
-        { cancelable: false }
-      )
-      this.props.navigation.dispatch(NavigationActions.back());
-    }).catch((error) => {
+        {cancelable: false},
+      );
+    })
+    .catch((error) => {
       Alert.alert(
         'There seems to be an error in Deleting',
-        error.message,
+        error,
         [
           { text: 'OK' },
         ],
@@ -157,7 +163,7 @@ class LocationSettingsScreen extends React.Component {
             >
               <Button
                 onPress={() => {
-                  this._saveNewLocation();
+                  this._saveLocation();
                 }}
                 title="Save Location"
                 color="green"
@@ -174,7 +180,7 @@ class LocationSettingsScreen extends React.Component {
 const withFirebaseLocationSettings = withFirebase(LocationSettingsScreen);
 
 withFirebaseLocationSettings.navigationOptions = ({ navigation }) => ({
-  title: navigation.getParam('markername', 'Location Settings'),
+  title: navigation.getParam('markerTitle', 'Location Settings'),
   headerStyle: {
     backgroundColor: '#089EE8',
     borderBottomColor: 'black',
