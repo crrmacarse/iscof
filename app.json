@@ -4,8 +4,8 @@
     "slug": "ISCOF",
     "privacy": "public",
     "sdkVersion": "32.0.0",
-    "android": { 
-      "package": "com.crrmacarse.iscof" 
+    "android": {
+      "package": "com.crrmacarse.iscof"
     },
     "platforms": [
       "ios",
