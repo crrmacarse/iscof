@@ -636,7 +636,7 @@ x
                     fontSize: 20,
                     marginRight: 5,
                   }}>
-                  Dean:
+                  Office Head:
                  </Text>
                 <TextInput
                   onChangeText={(text) => this.setState({ newDean: text })}
@@ -871,7 +871,7 @@ x
                       fontSize: 20,
                       marginRight: 5,
                     }}>
-                    Dean:
+                    Office Head:
                  </Text>
                   <TextInput
                     onChangeText={(text) => {

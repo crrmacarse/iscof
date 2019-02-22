@@ -70,7 +70,7 @@ export default class AboutScreen extends React.Component {
           />
           <View style ={{alignSelf: 'center', padding: 20}}>
             <Text style={styles.mainTitle}>
-              Iloilo State College of Science and Technology - Dumangas Campus
+              Iloilo State College of Fisheries - Dumangas Campus
             </Text>
           </View>
         </View>

@@ -245,7 +245,7 @@ class LocationScreen extends React.Component {
                       fontSize: 12,
                       letterSpacing: 0.5,
                       color: "#585858"
-                    }}>Dean: {moreInfo.dean}</Text>
+                    }}>Office Head: {moreInfo.dean}</Text>
                   </View>
                 }
 
